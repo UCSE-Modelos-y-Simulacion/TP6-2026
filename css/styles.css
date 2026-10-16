@@ -1,0 +1,219 @@
+/* ==========================================================================
+   TP6 - Teoría de Colas y Simulación de Líneas de Espera | UCSE 2026
+   Glassmorphism + Dark Mode High-End + Widgets Interactivos
+   ========================================================================== */
+
+:root {
+    --bg-dark: #0a0e17;
+    --card-bg: rgba(17, 24, 39, 0.7);
+    --border-glass: rgba(255, 255, 255, 0.08);
+    --primary: #8b5cf6;
+    --primary-glow: rgba(139, 92, 246, 0.35);
+    --secondary: #06b6d4;
+    --secondary-glow: rgba(6, 182, 212, 0.35);
+    --emerald: #10b981;
+    --amber: #f59e0b;
+    --rose: #f43f5e;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background-color: var(--bg-dark);
+    color: #e5e7eb;
+}
+
+h1, h2, h3, h4, .font-outfit {
+    font-family: 'Outfit', sans-serif;
+}
+
+.font-mono {
+    font-family: 'JetBrains Mono', monospace;
+}
+
+/* Glassmorphism Panels */
+.glass-panel {
+    background: rgba(17, 24, 39, 0.65);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--border-glass);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-panel:hover {
+    border-color: rgba(139, 92, 246, 0.25);
+    box-shadow: 0 10px 30px -10px var(--primary-glow);
+}
+
+.glass-card-subtle {
+    background: rgba(15, 23, 42, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+::-webkit-scrollbar-track {
+    background: rgba(10, 14, 23, 0.6);
+    border-radius: 4px;
+}
+::-webkit-scrollbar-thumb {
+    background: rgba(139, 92, 246, 0.3);
+    border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(139, 92, 246, 0.6);
+}
+
+/* Tab Navigation Buttons */
+.tab-btn {
+    padding: 0.5rem 1rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(17, 24, 39, 0.6);
+    color: #9ca3af;
+    cursor: pointer;
+}
+
+.tab-btn:hover {
+    color: #fff;
+    border-color: rgba(139, 92, 246, 0.4);
+    background: rgba(139, 92, 246, 0.15);
+}
+
+.tab-btn.active {
+    background: linear-gradient(135deg, #8b5cf6, #6366f1);
+    color: #fff;
+    border-color: transparent;
+    box-shadow: 0 4px 14px rgba(139, 92, 246, 0.4);
+}
+
+/* Badges */
+.badge-tipo {
+    font-size: 0.7rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 9999px;
+    background: rgba(139, 92, 246, 0.15);
+    border: 1px solid rgba(139, 92, 246, 0.3);
+    color: #c4b5fd;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.badge-alpha {
+    font-size: 0.7rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 9999px;
+    background: rgba(6, 182, 212, 0.15);
+    border: 1px solid rgba(6, 182, 212, 0.3);
+    color: #67e8f9;
+}
+
+/* Theory Accordions */
+.biblio-guide {
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 0.75rem;
+    background: rgba(10, 14, 23, 0.5);
+    overflow: hidden;
+    transition: border-color 0.2s ease;
+}
+
+.biblio-guide:hover {
+    border-color: rgba(6, 182, 212, 0.3);
+}
+
+.biblio-header {
+    padding: 0.75rem 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    user-select: none;
+    background: rgba(15, 23, 42, 0.4);
+}
+
+.biblio-title {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #67e8f9;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.biblio-chevron {
+    transition: transform 0.3s ease;
+}
+
+.biblio-guide.open .biblio-chevron {
+    transform: rotate(180deg);
+}
+
+.biblio-body {
+    padding: 0 1rem;
+    max-height: 0;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0, 1, 0, 1);
+    font-size: 0.8rem;
+    line-height: 1.5;
+    color: #9ca3af;
+}
+
+.biblio-guide.open .biblio-body {
+    max-height: 3000px;
+    padding: 0.75rem 1rem 1rem;
+    transition: all 0.4s cubic-bezier(1, 0, 1, 0);
+}
+
+/* Simulation Canvas */
+.canvas-container {
+    position: relative;
+    width: 100%;
+    border-radius: 0.75rem;
+    overflow: hidden;
+    background: rgba(10, 14, 23, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+canvas {
+    display: block;
+    width: 100%;
+}
+
+/* Range Sliders */
+input[type=range] {
+    -webkit-appearance: none;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 9999px;
+    height: 6px;
+    outline: none;
+}
+
+input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #8b5cf6;
+    cursor: pointer;
+    box-shadow: 0 0 10px rgba(139, 92, 246, 0.5);
+    transition: transform 0.1s;
+}
+
+input[type=range]::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+}
+
+/* KaTeX custom sizing in dark mode */
+.katex {
+    font-size: 1.05em;
+    color: #f3f4f6;
+}
+.katex-display {
+    margin: 0.5em 0;
+}

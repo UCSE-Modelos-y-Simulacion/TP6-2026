@@ -1,0 +1,25 @@
+name: GitHub Classroom Autograder
+on:
+  push:
+    paths:
+      - 'entregas/**'
+  workflow_dispatch:
+
+permissions:
+  checks: write
+  actions: read
+  contents: read
+
+jobs:
+  build:
+    name: Autograding
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Run Autograder
+        run: |
+          python autograder_tp6.py

@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TP6 - Teoría de Colas y Simulación | UCSE 2026</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        darkBg: '#0a0e17',
+                        cardBg: 'rgba(17, 24, 39, 0.7)',
+                        primary: '#8b5cf6',
+                        secondary: '#06b6d4',
+                        emerald: '#10b981',
+                        amber: '#f59e0b',
+                        rose: '#f43f5e'
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- KaTeX CDN para renderizado de fórmulas display $$ -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}], throwOnError: false});"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="bg-darkBg text-gray-200 font-sans min-h-screen flex flex-col relative overflow-x-hidden selection:bg-primary/30 selection:text-white">
+    <!-- Ambient Glowing Gradient Orbs -->
+    <div class="fixed top-[-20%] left-[-10%] w-[55%] h-[55%] bg-primary/15 rounded-full blur-[140px] pointer-events-none"></div>
+    <div class="fixed bottom-[-20%] right-[-10%] w-[55%] h-[55%] bg-secondary/15 rounded-full blur-[140px] pointer-events-none"></div>
+
+    <!-- Top Institution Bar -->
+    <header class="border-b border-white/5 bg-black/40 backdrop-blur-md sticky top-0 z-50 py-3">
+        <div class="container mx-auto px-4 flex flex-wrap justify-between items-center gap-2">
+            <div class="flex items-center gap-3">
+                <span class="text-xs font-bold tracking-widest uppercase bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                    UCSE • Facultad de Ingeniería
+                </span>
+                <span class="text-gray-600 text-xs">|</span>
+                <span class="text-xs text-gray-400 font-medium">Modelos y Simulación 2026</span>
+            </div>
+            <div class="flex items-center gap-2 text-xs text-gray-400">
+                <span class="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span>Laboratorio Interactivo de Colas & FlexSim</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-8 relative z-10 flex-grow max-w-7xl">
+        
+        <!-- Hero Header -->
+        <section class="text-center mb-8">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-semibold mb-3">
+                <span>Trabajo Práctico N° 6 • Teoría de Colas y Líneas de Espera</span>
+            </div>
+            <h1 class="text-3xl md:text-5xl font-[Outfit] font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-primary via-indigo-300 to-secondary mb-3 tracking-tight">
+                Modelos Estocásticos de Espera (M/M/1 y M/M/c)
+            </h1>
+            <p class="text-sm md:text-base text-gray-400 max-w-3xl mx-auto leading-relaxed">
+                Aprenda a diagnosticar la congestión, calcular indicadores operacionales de colas y dimensionar servidores para el cumplimiento de Acuerdos de Nivel de Servicio (SLA) como entrenamiento directo para el Trabajo Final en FlexSim.
+            </p>
+        </section>
+
+        <!-- SECCIÓN 1: RESUMEN TEÓRICO Y APUNTES DE CÁTEDRA (Desplegables) -->
+        <section class="mb-10 space-y-3">
+            <div class="flex items-center justify-between mb-1">
+                <h2 class="text-lg font-[Outfit] font-bold text-gray-200 flex items-center gap-2">
+                    <svg class="w-5 h-5 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                    <span>Apuntes Teóricos, Notación y Formulario de Cátedra</span>
+                </h2>
+                <span class="text-xs text-gray-500 font-mono">Haz clic en cada panel para desplegar</span>
+            </div>
+
+            <!-- Panel 1: Notación de Kendall y 5 Elementos -->
+            <div class="biblio-guide">
+                <div class="biblio-header" onclick="this.parentElement.classList.toggle('open')">
+                    <span class="biblio-title">
+                        📌 1. Notación de Kendall y los 5 Elementos de un Sistema de Simulación
+                    </span>
+                    <svg class="w-4 h-4 text-cyan-400 biblio-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </div>
+                <div class="biblio-body text-xs md:text-sm">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                        <div>
+                            <h4 class="font-bold text-cyan-300 mb-1">Notación Estándar A / B / c:</h4>
+                            <ul class="list-disc list-inside space-y-1 text-gray-300">
+                                <li><strong>A (Llegadas):</strong> Distribución de tiempos entre arribos (<strong>M</strong> = Exponencial / Proceso de Poisson con tasa media &lambda;).</li>
+                                <li><strong>B (Servicio):</strong> Distribución de tiempos de atención (<strong>M</strong> = Exponencial con tasa media &mu;).</li>
+                                <li><strong>c (Canales):</strong> Cantidad de servidores o puestos idénticos en paralelo (c &ge; 1) con fila única.</li>
+                                <li><strong>Disciplina:</strong> FIFO (First-In, First-Out), capacidad ilimitada y sin abandonos.</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-purple-300 mb-1">Los 5 Elementos de Simulación:</h4>
+                            <ul class="list-disc list-inside space-y-1 text-gray-300">
+                                <li><strong>Entidades:</strong> Clientes, paquetes, vehículos o llamadas que fluyen por el sistema.</li>
+                                <li><strong>Atributos:</strong> Hora de llegada, tipo de trámite o prioridad de la entidad.</li>
+                                <li><strong>Actividades:</strong> Proceso de atención de duración estocástica en el servidor.</li>
+                                <li><strong>Estados:</strong> Condición actual (Servidor Libre/Ocupado, Longitud de cola <i>n</i>).</li>
+                                <li><strong>Eventos:</strong> Instantes que alteran el estado (Arribo, Inicio servicio, Fin servicio).</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Panel 2: Formulario Oficial M/M/1 y M/M/c -->
+            <div class="biblio-guide">
+                <div class="biblio-header" onclick="this.parentElement.classList.toggle('open')">
+                    <span class="biblio-title">
+                        📐 2. Fórmulas Matemáticas Oficiales (M/M/1 y M/M/c)
+                    </span>
+                    <svg class="w-4 h-4 text-cyan-400 biblio-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </div>
+                <div class="biblio-body text-xs md:text-sm">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                        <div class="p-3.5 rounded-lg bg-gray-900/60 border border-purple-500/20 space-y-1.5">
+                            <h4 class="font-bold text-purple-300 mb-2 border-b border-purple-500/20 pb-1">Modelo M/M/1 (Cola Simple):</h4>
+                            <p class="text-gray-300">• Intensidad de uso: <span class="font-mono text-purple-200 font-semibold">&rho; = &lambda; / &mu; &lt; 1</span></p>
+                            <p class="text-gray-300">• Probabilidad de ocio: <span class="font-mono text-purple-200">P₀ = 1 - &rho;</span></p>
+                            <p class="text-gray-300">• Probabilidad de esperar en fila: <span class="font-mono text-purple-200">P(esperar) = &rho;</span></p>
+                            <p class="text-gray-300">• Longitud media de cola: <span class="font-mono text-purple-200">L<sub>q</sub> = &rho;² / (1 - &rho;)</span></p>
+                            <p class="text-gray-300">• Clientes en sistema: <span class="font-mono text-purple-200">L = &rho; / (1 - &rho;) = L<sub>q</sub> + &rho;</span></p>
+                            <p class="text-gray-300">• Tiempo medio en cola: <span class="font-mono text-purple-200">W<sub>q</sub> = L<sub>q</sub> / &lambda;</span></p>
+                            <p class="text-gray-300">• Tiempo medio en sistema: <span class="font-mono text-purple-200">W = W<sub>q</sub> + 1/&mu;</span></p>
+                        </div>
+                        <div class="p-3.5 rounded-lg bg-gray-900/60 border border-cyan-500/20 space-y-1.5">
+                            <h4 class="font-bold text-cyan-300 mb-2 border-b border-cyan-500/20 pb-1">Modelo M/M/c (Servidores en Paralelo):</h4>
+                            <p class="text-gray-300">• Intensidad de tráfico: <span class="font-mono text-cyan-200">r = &lambda; / &mu;</span> | Utilización: <span class="font-mono text-cyan-200">&rho; = r / c &lt; 1</span></p>
+                            <p class="text-gray-300">• Probabilidad de sistema vacío (P₀):</p>
+                            <div class="my-1 text-center font-mono text-cyan-200 text-xs">
+                                $$P_0 = \left[ \sum_{n=0}^{c-1} \frac{r^n}{n!} + \frac{r^c}{c!(1 - \rho)} \right]^{-1}$$
+                            </div>
+                            <p class="text-gray-300">• Probabilidad de esperar (Fórmula C de Erlang):</p>
+                            <div class="my-1 text-center font-mono text-cyan-200 text-xs">
+                                $$P(\text{esperar}) = P(n \ge c) = \frac{r^c}{c!(1 - \rho)} \cdot P_0$$
+                            </div>
+                            <p class="text-gray-300">• Longitud de cola: <span class="font-mono text-cyan-200">L<sub>q</sub> = P(n &ge; c) · &rho; / (1 - &rho;)</span></p>
+                            <p class="text-gray-300">• Tiempos medios: <span class="font-mono text-cyan-200">W<sub>q</sub> = L<sub>q</sub> / &lambda;</span> | <span class="font-mono text-cyan-200">W = W<sub>q</sub> + 1/&mu;</span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Panel 3: Mini Guía FlexSim 2026 (Puesta en marcha y Régimen Permanente) -->
+            <div class="biblio-guide">
+                <div class="biblio-header" onclick="this.parentElement.classList.toggle('open')">
+                    <span class="biblio-title">
+                        🚀 3. Mini Guía FlexSim 2026: ¿Cómo modelar, cuántos días simular y contrastar con la teoría?
+                    </span>
+                    <svg class="w-4 h-4 text-cyan-400 biblio-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </div>
+                <div class="biblio-body text-xs md:text-sm">
+                    <div class="p-3.5 rounded-lg bg-gray-900/60 border border-cyan-500/20 mb-3 text-gray-300">
+                        <span class="font-bold text-cyan-300 block mb-1">🎯 Objetivo en el Laboratorio:</span>
+                        <p class="leading-relaxed">
+                            Contrastar los resultados numéricos obtenidos en las fórmulas analíticas (M/M/1 y M/M/c) con una simulación estocástica en <strong>FlexSim 2026</strong> para validar el comportamiento del sistema real antes del Trabajo Final.
+                        </p>
+                    </div>
+
+                    <!-- ALERTA CRÍTICA: POISSON VS EXPONENCIAL -->
+                    <div class="p-3.5 rounded-lg bg-rose-950/30 border border-rose-500/40 mb-4 text-gray-300">
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="text-rose-400 font-bold flex items-center gap-1.5 text-xs md:text-sm">
+                                🚨 ¡ALERTA TEÓRICA Y ERROR CLÁSICO EN FLEXSIM!: ¿Por qué si el problema dice "Poisson" se DEBE elegir "Exponential"?
+                            </span>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-[11px] leading-relaxed">
+                            <div class="p-2.5 rounded bg-black/50 border border-rose-500/30 space-y-1">
+                                <span class="text-rose-300 font-bold block">1. En el Source (Llegadas &lambda;):</span>
+                                <p>• <strong>Enunciado Teórico:</strong> <i>"Llegadas con proceso de Poisson de tasa &lambda;"</i>. Mide el <strong>conteo discreto de paquetes/hora</strong> (cuántos llegan por unidad de tiempo).</p>
+                                <p>• <strong>FlexSim (Inter-Arrival Time):</strong> El simulador pide el <strong>tiempo continuo transcurrido entre un arribo y el siguiente (&Delta;t)</strong>.</p>
+                                <p>• <strong>Demostración Estocástica:</strong> Si el conteo de llegadas es Poisson(&lambda;), el tiempo entre arribos consecutivos es estrictamente <strong>EXPONENCIAL(&lambda;)</strong> con media <code class="text-purple-300 font-bold">1 / &lambda;</code>.</p>
+                                <p class="text-amber-300 font-semibold mt-1">
+                                    ⚠️ <strong>¡NUNCA selecciones <code>poisson</code> en el desplegable de FlexSim!</strong> Si eliges Poisson con media 18, FlexSim esperará ~18 horas discretas entre cada entidad. Selecciona SIEMPRE <code class="text-emerald-300 font-bold">Exponential</code> con <code class="text-emerald-300">Scale = 1/&lambda;</code>.
+                                </p>
+                            </div>
+                            <div class="p-2.5 rounded bg-black/50 border border-cyan-500/30 space-y-1">
+                                <span class="text-cyan-300 font-bold block">2. En el Processor (Servicio &mu;):</span>
+                                <p>• <strong>Enunciado Teórico:</strong> <i>"Tiempo de servicio sigue una distribución exponencial con tasa media &mu;"</i> (o tiempo medio 1/&mu;).</p>
+                                <p>• <strong>FlexSim (Process Time):</strong> Mide la duración que el servidor retiene una entidad en estado Processing.</p>
+                                <p>• <strong>Configuración:</strong> Selecciona también <strong><code>Exponential</code></strong> y en <code>Scale</code> ingresa el tiempo medio de atención <code class="text-cyan-300 font-bold">1 / &mu;</code>.</p>
+                                <p class="text-emerald-300 font-semibold mt-1">
+                                    💡 <strong>Regla Mnemotécnica de Cátedra:</strong> En FlexSim, tanto para el <strong>Source</strong> como para el <strong>Processor</strong>, se utiliza SIEMPRE la distribución <strong><code>Exponential</code></strong> cargando <code class="text-cyan-200">Scale = 1 / Tasa</code>.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 pt-1 mb-4">
+                        
+                        <!-- COLUMNA 1: ENTRADA Y SERVICIO (Source + Processor) -->
+                        <div class="space-y-4 flex flex-col justify-between">
+                            
+                            <!-- PASO 1: SOURCE -->
+                            <div class="p-3.5 rounded-lg bg-gray-900/50 border border-purple-500/20 space-y-2.5 shadow-sm">
+                                <h4 class="font-bold text-purple-300 border-b border-purple-500/20 pb-1.5 flex items-center justify-between">
+                                    <span class="flex items-center gap-2">
+                                        <span class="bg-purple-900/60 text-purple-300 px-2 py-0.5 rounded text-xs font-mono font-bold border border-purple-700/50">Paso 1</span>
+                                        <span>Configuración del Source (Llegadas &lambda;)</span>
+                                    </span>
+                                    <span class="text-[10px] text-purple-400 font-mono bg-purple-950/60 px-2 py-0.5 rounded border border-purple-800/40">Entrada</span>
+                                </h4>
+                                
+                                <div class="p-2.5 rounded bg-black/40 border border-purple-500/30 text-gray-300 text-[11px] space-y-1">
+                                    <p>1. Selecciona el <strong>Source</strong> &rarr; mira el panel lateral derecho <strong>Properties</strong>.</p>
+                                    <p>2. En la sección <i>Source</i>, verifica que <strong>Arrival Style</strong> esté en <code class="text-purple-300">Inter-Arrival Time</code>.</p>
+                                    <p>3. En <strong>Inter-Arrival Time</strong>, haz clic en el botón desplegable &rarr; <span class="text-cyan-300">Statistical Distribution</span> &rarr; <span class="text-emerald-300 font-bold">Exponential</span> (¡No Poisson!).</p>
+                                    <p>4. Expresión cargada: <code class="text-purple-200">exponential(location, scale, stream)</code> con <strong>location = 0</strong>.</p>
+                                </div>
+
+                                <div class="p-2 rounded bg-amber-950/40 border border-amber-500/30 text-amber-200 text-[11px] space-y-1">
+                                    <p>⚠️ <strong>¡Cuidado con la división entera en FlexSim!:</strong> Si escribes <code class="text-rose-300 font-mono">1/18</code>, FlexSim hace división entera entre enteros (<code class="font-mono">1 / 18 = 0</code>), lo que genera <em>Scale = 0</em> y da el error <strong>"Could not generate sample data"</strong>.</p>
+                                    <p>• <strong>Solución:</strong> Escribe siempre el número con decimales: <code class="text-emerald-300 font-bold font-mono">0.0556</code> (o <code class="text-emerald-300 font-mono">1.0 / 18</code>). O mejor aún, usa la unidad del modelo (ej: <strong>200</strong> segundos o <strong>3.3333</strong> minutos).</p>
+                                </div>
+
+                                <div class="text-[11px] text-gray-300 space-y-1">
+                                    <span class="font-semibold text-purple-200 block">• Valores a ingresar en Scale según la unidad de tiempo del modelo:</span>
+                                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-[10px]">
+                                        <div class="p-2 rounded bg-gray-950/60 border border-white/5 space-y-0.5">
+                                            <span class="font-bold text-cyan-300 block">Modelo en Segundos (Por defecto):</span>
+                                            <p class="font-mono text-gray-300">Scale = 3600 / &lambda;</p>
+                                            <p class="text-emerald-400 font-mono font-bold">18 paq/h &rarr; ingresar 200</p>
+                                        </div>
+                                        <div class="p-2 rounded bg-gray-950/60 border border-white/5 space-y-0.5">
+                                            <span class="font-bold text-cyan-300 block">Modelo en Minutos:</span>
+                                            <p class="font-mono text-gray-300">Scale = 60 / &lambda;</p>
+                                            <p class="text-emerald-400 font-mono font-bold">18 paq/h &rarr; ingresar 3.3333</p>
+                                        </div>
+                                        <div class="p-2 rounded bg-gray-950/60 border border-white/5 space-y-0.5">
+                                            <span class="font-bold text-cyan-300 block">Modelo en Horas:</span>
+                                            <p class="font-mono text-gray-300">Scale = 1.0 / &lambda;</p>
+                                            <p class="text-emerald-400 font-mono font-bold">18 paq/h &rarr; ingresar 0.0556</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- PASO 2: PROCESSOR -->
+                            <div class="p-3.5 rounded-lg bg-gray-900/50 border border-cyan-500/20 space-y-2.5 shadow-sm">
+                                <h4 class="font-bold text-cyan-300 border-b border-cyan-500/20 pb-1.5 flex items-center justify-between">
+                                    <span class="flex items-center gap-2">
+                                        <span class="bg-cyan-900/60 text-cyan-300 px-2 py-0.5 rounded text-xs font-mono font-bold border border-cyan-700/50">Paso 2</span>
+                                        <span>Configuración del Processor (Servicio &mu;)</span>
+                                    </span>
+                                    <span class="text-[10px] text-cyan-400 font-mono bg-cyan-950/60 px-2 py-0.5 rounded border border-cyan-800/40">Servidor</span>
+                                </h4>
+                                
+                                <div class="p-2.5 rounded bg-black/40 border border-cyan-500/30 text-gray-300 text-[11px] space-y-1">
+                                    <p>1. Selecciona el <strong>Processor</strong> &rarr; mira la sección <i>Processor</i> en el panel <strong>Properties</strong>.</p>
+                                    <p>2. <strong>Max Content:</strong> <code class="text-cyan-300">1</code> (1 entidad a la vez por servidor en paralelo).</p>
+                                    <p>3. <strong>Setup Time:</strong> <code class="text-cyan-300">0</code> (sin tiempo previo de preparación).</p>
+                                    <p>4. <strong>Process Time:</strong> Cambia de constante a &rarr; <span class="text-purple-300">Statistical Distribution</span> &rarr; <span class="text-emerald-300 font-bold">Exponential</span>.</p>
+                                    <p>5. Expresión: <code class="text-cyan-200">exponential(0, scale, getstream(current))</code> con <strong>Scale = 1/&mu;</strong>.</p>
+                                </div>
+
+                                <div class="text-[11px] text-gray-300 space-y-1">
+                                    <span class="font-semibold text-cyan-200 block">• Valores a ingresar en Scale según la unidad de tiempo del modelo:</span>
+                                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-[10px]">
+                                        <div class="p-2 rounded bg-gray-950/60 border border-white/5 space-y-0.5">
+                                            <span class="font-bold text-cyan-300 block">Modelo en Segundos (Por defecto):</span>
+                                            <p class="font-mono text-gray-300">Scale = 3600 / &mu;</p>
+                                            <p class="text-emerald-400 font-mono font-bold">24 paq/h &rarr; ingresar 150</p>
+                                        </div>
+                                        <div class="p-2 rounded bg-gray-950/60 border border-white/5 space-y-0.5">
+                                            <span class="font-bold text-cyan-300 block">Modelo en Minutos:</span>
+                                            <p class="font-mono text-gray-300">Scale = 60 / &mu;</p>
+                                            <p class="text-emerald-400 font-mono font-bold">24 paq/h &rarr; ingresar 2.5</p>
+                                        </div>
+                                        <div class="p-2 rounded bg-gray-950/60 border border-white/5 space-y-0.5">
+                                            <span class="font-bold text-cyan-300 block">Modelo en Horas:</span>
+                                            <p class="font-mono text-gray-300">Scale = 1.0 / &mu;</p>
+                                            <p class="text-emerald-400 font-mono font-bold">24 paq/h &rarr; ingresar 0.0417</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- COLUMNA 2: FLUJO MULTICANAL Y CONTROL DE CORRIDA (Queue + Run Control) -->
+                        <div class="space-y-4 flex flex-col justify-between">
+                            
+                            <!-- PASO 3: QUEUE & ROUND ROBIN -->
+                            <div class="p-3.5 rounded-lg bg-gray-900/50 border border-emerald-500/20 space-y-2.5 shadow-sm">
+                                <h4 class="font-bold text-emerald-300 border-b border-emerald-500/20 pb-1.5 flex items-center justify-between">
+                                    <span class="flex items-center gap-2">
+                                        <span class="bg-emerald-900/60 text-emerald-300 px-2 py-0.5 rounded text-xs font-mono font-bold border border-emerald-700/50">Paso 3</span>
+                                        <span>Configuración de la Queue (Multicanal M/M/c)</span>
+                                    </span>
+                                    <span class="text-[10px] text-emerald-400 font-mono bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-800/40">Buffer FIFO</span>
+                                </h4>
+
+                                <div class="p-2.5 rounded bg-black/40 border border-emerald-500/30 text-gray-300 text-[11px] space-y-1">
+                                    <p>1. Conecta la <strong>Queue</strong> a cada uno de los <i>c</i> <strong>Processors</strong> en paralelo mediante puertos de salida (tecla <strong>'A'</strong>).</p>
+                                    <p>2. Selecciona la <strong>Queue</strong> &rarr; mira la sección <strong>Output</strong> en el panel derecho <strong>Properties</strong>.</p>
+                                    <p>3. En el campo <strong>Send To Port</strong>, haz clic en el desplegable y selecciona:  
+                                       <strong class="text-cyan-300 font-mono">Round Robin &gt; Round Robin if Available</strong>.
+                                    </p>
+                                </div>
+
+                                <div class="p-2.5 rounded bg-indigo-950/40 border border-indigo-700/40 text-[11px] space-y-1.5">
+                                    <span class="font-bold text-indigo-300 block">💡 Justificación de Ingeniería (¿Por qué esta regla?):</span>
+                                    <p class="text-gray-300 leading-relaxed">
+                                        • <strong>Balanceo de Carga (Load Balancing):</strong> La opción por defecto <i>First Available</i> siempre satura el Puerto 1 (Processor 1) dejando ociosos a los demás. <i>Round Robin</i> distribuye la carga en forma equilibrada (&rho;<sub>1</sub> &approx; &rho;<sub>2</sub> &approx; &rho;).
+                                    </p>
+                                    <p class="text-gray-300 leading-relaxed">
+                                        • <strong>Principio "Work-Conserving":</strong> La variante <i>"if Available"</i> asegura que si el servidor de turno está ocupado, la entidad pasa de inmediato al canal que esté libre, evitando colas artificiales y respetando estrictamente la disciplina M/M/c.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- PASO 4: RÉGIMEN PERMANENTE Y WARM-UP TIME -->
+                            <div class="p-3.5 rounded-lg bg-gray-900/50 border border-amber-500/20 space-y-2.5 shadow-sm">
+                                <h4 class="font-bold text-amber-300 border-b border-amber-500/20 pb-1.5 flex items-center justify-between">
+                                    <span class="flex items-center gap-2">
+                                        <span class="bg-amber-900/60 text-amber-300 px-2 py-0.5 rounded text-xs font-mono font-bold border border-amber-700/50">Paso 4</span>
+                                        <span>Régimen Permanente y Warm-up Time</span>
+                                    </span>
+                                    <span class="text-[10px] text-amber-400 font-mono bg-amber-950/60 px-2 py-0.5 rounded border border-amber-800/40">Estabilidad</span>
+                                </h4>
+
+                                <div class="p-2 rounded bg-amber-950/30 border border-amber-500/20 text-amber-200 text-[11px]">
+                                    ⚠️ <strong>Duda frecuente:</strong> <i>"¿Por qué si simulo 1 hora o 1 día no coinciden los datos con la teoría?"</i>  
+                                    Las fórmulas analíticas calculan el <strong>Régimen Permanente (<i>t</i> &rarr; &infin;)</strong>. Al iniciar en <i>t</i> = 0, el modelo arranca completamente <i>Vacío y Ocioso (Empty & Idle)</i>, sesgando los promedios.
+                                </div>
+
+                                <div class="p-2.5 rounded bg-black/40 border border-emerald-500/30 text-gray-300 text-[11px] space-y-1">
+                                    <p class="text-emerald-300 font-semibold">📍 Configuración en la Barra Superior (junto a Run Time):</p>
+                                    <p>1. Clic en la <strong>flechita desplegable (▼)</strong> al lado de la casilla <strong>Run Time</strong>.</p>
+                                    <p>2. Activa <strong class="text-cyan-300">Warmup Time</strong> e ingresa <code class="text-cyan-200">24.00</code> horas (1 día para purgar el transitorio).</p>
+                                    <p>3. Activa <strong class="text-emerald-300">Stop Times</strong> e ingresa <code class="text-emerald-200">168.00</code> (7 días) o <code class="text-emerald-200">336.00</code> (14 días).</p>
+                                    <p class="text-gray-400 text-[10px]"><em>Efecto: A las 24 horas, FlexSim resetea las estadísticas en limpio y mide puramente el régimen permanente.</em></p>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- PASO 5: TABLA COMPARATIVA DE CONTRASTE -->
+                    <div class="mb-4">
+                        <h4 class="font-bold text-gray-200 text-xs mb-2 flex items-center gap-2">
+                            <span class="bg-cyan-900/60 text-cyan-300 px-2 py-0.5 rounded text-xs font-mono font-bold border border-cyan-700/50">Paso 5</span>
+                            <span>Contraste de Métricas Teóricas en los Dashboards de FlexSim 2026:</span>
+                        </h4>
+
+                        <!-- Tabla de Mapeo de Indicadores -->
+                        <div class="overflow-x-auto mb-4">
+                            <table class="w-full text-left text-[11px] border-collapse bg-gray-900/50 rounded-lg overflow-hidden border border-white/10">
+                                <thead>
+                                    <tr class="bg-gray-800 text-gray-300 font-mono border-b border-white/10">
+                                        <th class="p-2">Indicador Teórico</th>
+                                        <th class="p-2">Objeto FlexSim</th>
+                                        <th class="p-2">Widget de Dashboard 2026</th>
+                                        <th class="p-2">Métrica a Contrastar</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-white/5 text-gray-300">
+                                    <tr>
+                                        <td class="p-2 font-mono text-purple-300">&rho; (Utilización)</td>
+                                        <td class="p-2">Processors (Servidores)</td>
+                                        <td class="p-2">State Bar / State Pie Chart</td>
+                                        <td class="p-2 text-gray-400">% de tiempo en estado <strong>Processing</strong> (debe converger a &rho;)</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="p-2 font-mono text-cyan-300">L<sub>q</sub> (Largo de cola)</td>
+                                        <td class="p-2">Queue (Línea de espera)</td>
+                                        <td class="p-2">Content vs Time / Summary Table</td>
+                                        <td class="p-2 text-gray-400"><strong>Average Content</strong> de la Queue</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="p-2 font-mono text-amber-300">W<sub>q</sub> (Espera en cola)</td>
+                                        <td class="p-2">Queue (Línea de espera)</td>
+                                        <td class="p-2">Staytime Chart</td>
+                                        <td class="p-2 text-gray-400"><strong>Average Staytime</strong> dividido 60 (para expresar en minutos)</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="p-2 font-mono text-rose-300">W (Tiempo en sistema)</td>
+                                        <td class="p-2">Sink (Salida del sistema)</td>
+                                        <td class="p-2">WIP / Staytime Dashboard</td>
+                                        <td class="p-2 text-gray-400"><strong>Average Staytime</strong> de entidades completas dividido 60</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- PASO 6: TABLA MAESTRA DE PARÁMETROS FLEXSIM PARA TODOS LOS EJERCICIOS -->
+                    <div class="p-3.5 rounded-lg bg-gray-900/60 border border-emerald-500/30">
+                        <div class="flex items-center justify-between mb-2 pb-1 border-b border-emerald-500/20">
+                            <h4 class="font-bold text-emerald-300 text-xs flex items-center gap-2">
+                                <span class="bg-emerald-900/60 text-emerald-300 px-2 py-0.5 rounded text-xs font-mono font-bold border border-emerald-700/50">Paso 6</span>
+                                <span>📋 Tabla Maestra: Parámetros Exactos FlexSim 2026 para TODOS los Ejercicios (Demo + Asignaciones 1 a 8)</span>
+                            </h4>
+                            <span class="text-[10px] text-emerald-400 font-mono">Referencia Oficial</span>
+                        </div>
+                        <p class="text-[11px] text-gray-400 mb-2">
+                            Usa esta tabla para contrastar tu modelo. Recuerda que tanto en el <strong>Source</strong> como en los <strong>Processors</strong> se selecciona distribución <strong><code>Exponential</code></strong>.
+                        </p>
+                        
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-[10px] md:text-[11px] border-collapse bg-black/40 rounded overflow-hidden border border-white/10">
+                                <thead>
+                                    <tr class="bg-gray-800 text-gray-300 font-mono border-b border-white/10">
+                                        <th class="p-2">Asignación</th>
+                                        <th class="p-2">Ej.</th>
+                                        <th class="p-2">Modelo</th>
+                                        <th class="p-2">Tasas Teóricas</th>
+                                        <th class="p-2 text-purple-300">Source: Inter-Arrival (Exponential)</th>
+                                        <th class="p-2 text-cyan-300">Processor: Process Time (Exponential)</th>
+                                        <th class="p-2 text-emerald-300">Queue: Send To Port</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-white/5 font-mono text-gray-300">
+                                    <tr class="bg-purple-950/20">
+                                        <td class="p-2 font-bold text-white">Demo Clase</td>
+                                        <td class="p-2 text-cyan-400">A</td>
+                                        <td class="p-2">M/M/1</td>
+                                        <td class="p-2 text-gray-400">&lambda;=30, &mu;=40</td>
+                                        <td class="p-2 text-purple-200">Scale: 1/30 (0.0333 hr | 2 min)</td>
+                                        <td class="p-2 text-cyan-200">c=1 | Scale: 1/40 (0.0250 hr | 1.5 min)</td>
+                                        <td class="p-2 text-gray-400">Directo (Puerto 1)</td>
+                                    </tr>
+                                    <tr class="bg-purple-950/20">
+                                        <td class="p-2 font-bold text-white">Demo Clase</td>
+                                        <td class="p-2 text-cyan-400">B</td>
+                                        <td class="p-2">M/M/2</td>
+                                        <td class="p-2 text-gray-400">&lambda;=20, &mu;=15</td>
+                                        <td class="p-2 text-purple-200">Scale: 1/20 (0.0500 hr | 3 min)</td>
+                                        <td class="p-2 text-cyan-200">c=2 | Scale: 1/15 (0.0667 hr | 4 min)</td>
+                                        <td class="p-2 text-emerald-300">Round Robin if Available</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="p-2 font-semibold text-gray-200">Alumno #1</td>
+                                        <td class="p-2 text-cyan-400">A</td>
+                                        <td class="p-2">M/M/1</td>
+                                        <td class="p-2 text-gray-400">&lambda;=18, &mu;=24</td>
+                                        <td class="p-2 text-purple-200">Scale: 1/18 (0.0556 hr | 3.33 min)</td>
+                                        <td class="p-2 text-cyan-200">c=1 | Scale: 1/24 (0.0417 hr | 2.5 min)</td>
+                                        <td class="p-2 text-gray-400">Directo (Puerto 1)</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="p-2 font-semibold text-gray-200">Alumno #1</td>
+                                        <td class="p-2 text-cyan-400">B</td>
+                                        <td class="p-2">M/M/2</td>
+                                        <td class="p-2 text-gray-400">&lambda;=24, &mu;=16</td>
+                                        <td class="p-2 text-purple-200">Scale: 1/24 (0.0417 hr | 2.5 min)</td>
+                                        <td class="p-2 text-cyan-200">c=2 | Scale: 1/16 (0.0625 hr | 3.75 min)</td>
+                                        <td class="p-2 text-emerald-300">Round Robin if Available</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="p-2 font-semibold text-gray-200">Alumno #2</td>
+                                        <td class="p-2 text-cyan-400">A</td>
+                                        <td class="p-2">M/M/1</td>
+                                        <td class="p-2 text-gray-400">&lambda;=45, &mu;=60</td>
+                                        <td class="p-2 text-purple-200">Scale: 1/45 (0.0222 hr | 1.33 min)</td>
+                                        <td class="p-2 text-cyan-200">c=1 | Scale: 1/60 (0.0167 hr | 1 min)</td>
+                                        <td class="p-2 text-gray-400">Directo (Puerto 1)</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="p-2 font-semibold text-gray-200">Alumno #2</td>
+                                        <td class="p-2 text-cyan-400">B</td>
+                                        <td class="p-2">M/M/3</td>
+                                        <td class="p-2 text-gray-400">&lambda;=120, &mu;=50</td>
+                                        <td class="p-2 text-purple-200">Scale: 1/120 (0.0083 hr | 0.5 min | 30 s)</td>
+                                        <td class="p-2 text-cyan-200">c=3 | Scale: 1/50 (0.0200 hr | 1.2 min | 72 s)</td>
+                                        <td class="p-2 text-emerald-300">Round Robin if Available</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="p-2 font-semibold text-gray-200">Alumno #3</td>
+                                        <td class="p-2 text-cyan-400">A</td>
+                                        <td class="p-2">M/M/1</td>
+                                        <td class="p-2 text-gray-400">&lambda;=40, &mu;=50</td>
+                                        <td class="p-2 text-purple-200">Scale: 1/40 (0.0250 hr | 1.5 min)</td>
+                                        <td class="p-2 text-cyan-200">c=1 | Scale: 1/50 (0.0200 hr | 1.2 min)</td>
+                                        <td class="p-2 text-gray-400">Directo (Puerto 1)</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="p-2 font-semibold text-gray-200">Alumno #3</td>
+                                        <td class="p-2 text-cyan-400">B</td>
+                                        <td class="p-2">M/M/2</td>
+                                        <td class="p-2 text-gray-400">&lambda;=30, &mu;=20</td>
+                                        <td class="p-2 text-purple-200">Scale: 1/30 (0.0333 hr | 2 min)</td>
+                                        <td class="p-2 text-cyan-200">c=2 | Scale: 1/20 (0.0500 hr | 3 min)</td>
+                                        <td class="p-2 text-emerald-300">Round Robin if Available</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="p-2 font-semibold text-gray-200">Alumno #4</td>
+                                        <td class="p-2 text-cyan-400">A</td>
+                                        <td class="p-2">M/M/1</td>
+                                        <td class="p-2 text-gray-400">&lambda;=25, &mu;=35</td>
+                                        <td class="p-2 text-purple-200">Scale: 1/25 (0.0400 hr | 2.4 min)</td>
+                                        <td class="p-2 text-cyan-200">c=1 | Scale: 1/35 (0.0286 hr | 1.71 min)</td>
+                                        <td class="p-2 text-gray-400">Directo (Puerto 1)</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="p-2 font-semibold text-gray-200">Alumno #4</td>
+                                        <td class="p-2 text-cyan-400">B</td>
+                                        <td class="p-2">M/M/3</td>
+                                        <td class="p-2 text-gray-400">&lambda;=18, &mu;=8</td>
+                                        <td class="p-2 text-purple-200">Scale: 1/18 (0.0556 hr | 3.33 min)</td>
+                                        <td class="p-2 text-cyan-200">c=3 | Scale: 1/8 (0.1250 hr | 7.5 min)</td>
+                                        <td class="p-2 text-emerald-300">Round Robin if Available</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="p-2 font-semibold text-gray-200">Alumno #5</td>
+                                        <td class="p-2 text-cyan-400">A</td>
+                                        <td class="p-2">M/M/1</td>
+                                        <td class="p-2 text-gray-400">&lambda;=15, &mu;=20</td>
+                                        <td class="p-2 text-purple-200">Scale: 1/15 (0.0667 hr | 4 min)</td>
+                                        <td class="p-2 text-cyan-200">c=1 | Scale: 1/20 (0.0500 hr | 3 min)</td>
+                                        <td class="p-2 text-gray-400">Directo (Puerto 1)</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="p-2 font-semibold text-gray-200">Alumno #5</td>
+                                        <td class="p-2 text-cyan-400">B</td>
+                                        <td class="p-2">M/M/2</td>
+                                        <td class="p-2 text-gray-400">&lambda;=20, &mu;=14</td>
+                                        <td class="p-2 text-purple-200">Scale: 1/20 (0.0500 hr | 3 min)</td>
+                                        <td class="p-2 text-cyan-200">c=2 | Scale: 1/14 (0.0714 hr | 4.29 min)</td>
+                                        <td class="p-2 text-emerald-300">Round Robin if Available</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="p-2 font-semibold text-gray-200">Alumno #6</td>
+                                        <td class="p-2 text-cyan-400">A</td>
+                                        <td class="p-2">M/M/1</td>
+                                        <td class="p-2 text-gray-400">&lambda;=50, &mu;=70</td>
+                                        <td class="p-2 text-purple-200">Scale: 1/50 (0.0200 hr | 1.2 min)</td>
+                                        <td class="p-2 text-cyan-200">c=1 | Scale: 1/70 (0.0143 hr | 0.86 min)</td>
+                                        <td class="p-2 text-gray-400">Directo (Puerto 1)</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="p-2 font-semibold text-gray-200">Alumno #6</td>
+                                        <td class="p-2 text-cyan-400">B</td>
+                                        <td class="p-2">M/M/3</td>
+                                        <td class="p-2 text-gray-400">&lambda;=42, &mu;=18</td>
+                                        <td class="p-2 text-purple-200">Scale: 1/42 (0.0238 hr | 1.43 min)</td>
+                                        <td class="p-2 text-cyan-200">c=3 | Scale: 1/18 (0.0556 hr | 3.33 min)</td>
+                                        <td class="p-2 text-emerald-300">Round Robin if Available</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="p-2 font-semibold text-gray-200">Alumno #7</td>
+                                        <td class="p-2 text-cyan-400">A</td>
+                                        <td class="p-2">M/M/1</td>
+                                        <td class="p-2 text-gray-400">&lambda;=28, &mu;=35</td>
+                                        <td class="p-2 text-purple-200">Scale: 1/28 (0.0357 hr | 2.14 min)</td>
+                                        <td class="p-2 text-cyan-200">c=1 | Scale: 1/35 (0.0286 hr | 1.71 min)</td>
+                                        <td class="p-2 text-gray-400">Directo (Puerto 1)</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="p-2 font-semibold text-gray-200">Alumno #7</td>
+                                        <td class="p-2 text-cyan-400">B</td>
+                                        <td class="p-2">M/M/2</td>
+                                        <td class="p-2 text-gray-400">&lambda;=16, &mu;=10</td>
+                                        <td class="p-2 text-purple-200">Scale: 1/16 (0.0625 hr | 3.75 min)</td>
+                                        <td class="p-2 text-cyan-200">c=2 | Scale: 1/10 (0.1000 hr | 6 min)</td>
+                                        <td class="p-2 text-emerald-300">Round Robin if Available</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="p-2 font-semibold text-gray-200">Alumno #8</td>
+                                        <td class="p-2 text-cyan-400">A</td>
+                                        <td class="p-2">M/M/1</td>
+                                        <td class="p-2 text-gray-400">&lambda;=12, &mu;=16</td>
+                                        <td class="p-2 text-purple-200">Scale: 1/12 (0.0833 hr | 5 min)</td>
+                                        <td class="p-2 text-cyan-200">c=1 | Scale: 1/16 (0.0625 hr | 3.75 min)</td>
+                                        <td class="p-2 text-gray-400">Directo (Puerto 1)</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="p-2 font-semibold text-gray-200">Alumno #8</td>
+                                        <td class="p-2 text-cyan-400">B</td>
+                                        <td class="p-2">M/M/3</td>
+                                        <td class="p-2 text-gray-400">&lambda;=36, &mu;=15</td>
+                                        <td class="p-2 text-purple-200">Scale: 1/36 (0.0278 hr | 1.67 min)</td>
+                                        <td class="p-2 text-cyan-200">c=3 | Scale: 1/15 (0.0667 hr | 4 min)</td>
+                                        <td class="p-2 text-emerald-300">Round Robin if Available</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Panel 4: Guía Bibliográfica Obligatoria -->
+            <div class="biblio-guide">
+                <div class="biblio-header" onclick="this.parentElement.classList.toggle('open')">
+                    <span class="biblio-title">
+                        📖 4. Dónde estudiar este tema en la bibliografía de cátedra
+                    </span>
+                    <svg class="w-4 h-4 text-cyan-400 biblio-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </div>
+                <div class="biblio-body text-xs md:text-sm">
+                    <p class="font-medium text-cyan-200 mb-2">Referencias oficiales de estudio para el TP y Trabajo Final:</p>
+                    <ul class="list-disc list-inside space-y-1 text-gray-300">
+                        <li><strong>Diapositivas Cátedra (Ing. María Fernanda Vázquez):</strong> Unidad 4 - Modelos de Espera y Teoría de Colas (pp. 1-20).</li>
+                        <li><strong>Beaverstock, Greenwood, Lavery:</strong> Applied Simulation: Modeling and Analysis using FlexSim (Cap. 1-4: Objetos Source, Queue, Processor, Sink y recolección de estadísticas).</li>
+                        <li><strong>García Dunna, Eduardo:</strong> Simulación y Análisis de Sistemas con ProModel (Cap. 4: Sistemas de Espera).</li>
+                        <li><strong>Banks, Jerry:</strong> Handbook of Simulation / Discrete-Event System Simulation (Cap. 2 y 6).</li>
+                        <li><strong>Cao Abad, Ricardo:</strong> Introducción a la Simulación y a la Teoría de Colas (Cap. 3 y 4).</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECCIÓN 2: SANDBOX & SIMULADOR DE COLAS EN VIVO (Widget Interactivo) -->
+        <section class="glass-panel rounded-2xl p-6 md:p-8 mb-10 border border-white/5" id="sandbox-section">
+            <div class="flex flex-wrap items-center justify-between gap-4 mb-6 border-b border-gray-800 pb-4">
+                <div>
+                    <span class="badge-tipo">Laboratorio Interactivo</span>
+                    <h2 class="text-2xl md:text-3xl font-[Outfit] font-bold text-white mt-1">
+                        Sandbox & Simulador Estocástico en Tiempo Real
+                    </h2>
+                    <p class="text-xs md:text-sm text-gray-400">Modifica los parámetros &lambda;, &mu; y c para observar en tiempo real cómo cambia la congestión, la distribución P<sub>n</sub> y el flujo en Canvas.</p>
+                </div>
+                <div class="hidden md:flex items-center gap-2">
+                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
+                    <span class="text-xs text-emerald-400 font-mono">Motor Activo</span>
+                </div>
+            </div>
+
+            <!-- Controles de Sliders -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                <!-- Slider Lambda -->
+                <div class="p-4 rounded-xl bg-gray-900/50 border border-white/5">
+                    <div class="flex justify-between items-center mb-2">
+                        <label class="text-xs font-semibold text-gray-300">Tasa de Llegada (&lambda;):</label>
+                        <span id="val-lambda" class="text-sm font-mono font-bold text-purple-400">30/h</span>
+                    </div>
+                    <input type="range" id="slider-lambda" min="5" max="150" value="30" step="1" class="w-full">
+                    <span class="text-[10px] text-gray-500 block mt-1">Frecuencia de clientes entrantes por hora</span>
+                </div>
+
+                <!-- Slider Mu -->
+                <div class="p-4 rounded-xl bg-gray-900/50 border border-white/5">
+                    <div class="flex justify-between items-center mb-2">
+                        <label class="text-xs font-semibold text-gray-300">Tasa de Servicio por Servidor (&mu;):</label>
+                        <span id="val-mu" class="text-sm font-mono font-bold text-cyan-400">40/h</span>
+                    </div>
+                    <input type="range" id="slider-mu" min="5" max="100" value="40" step="1" class="w-full">
+                    <span class="text-[10px] text-gray-500 block mt-1">Velocidad media de despacho de cada servidor</span>
+                </div>
+
+                <!-- Slider c -->
+                <div class="p-4 rounded-xl bg-gray-900/50 border border-white/5">
+                    <div class="flex justify-between items-center mb-2">
+                        <label class="text-xs font-semibold text-gray-300">Cantidad de Servidores (c):</label>
+                        <span id="val-c" class="text-sm font-mono font-bold text-emerald-400">1</span>
+                    </div>
+                    <input type="range" id="slider-c" min="1" max="5" value="1" step="1" class="w-full">
+                    <span class="text-[10px] text-gray-500 block mt-1">Canales en paralelo con cola única (1 a 5)</span>
+                </div>
+            </div>
+
+            <!-- Alerta de Sistema Saturado -->
+            <div id="sandbox-unstable-alert" class="hidden p-3 rounded-lg bg-red-950/60 border border-red-500/40 text-red-200 text-xs mb-4 flex items-center gap-2">
+                <svg class="w-5 h-5 text-red-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                <span><strong>¡Sistema Inestable (&rho; &ge; 100%)!</strong> La tasa de llegada excede la capacidad del sistema. La cola crecerá indefinidamente hacia el infinito.</span>
+            </div>
+
+            <!-- Tarjetas de Métricas KPI en Tiempo Real -->
+            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-6">
+                <div class="p-3 rounded-xl bg-gray-900/40 border border-white/5 text-center">
+                    <span class="text-[10px] text-gray-400 uppercase tracking-wider block">Utilización (&rho;)</span>
+                    <span id="kpi-rho" class="text-base font-mono font-bold text-purple-300">75.0%</span>
+                </div>
+                <div class="p-3 rounded-xl bg-gray-900/40 border border-white/5 text-center">
+                    <span class="text-[10px] text-gray-400 uppercase tracking-wider block">Ocio Total (P₀)</span>
+                    <span id="kpi-p0" class="text-base font-mono font-bold text-emerald-400">25.00%</span>
+                </div>
+                <div class="p-3 rounded-xl bg-gray-900/40 border border-white/5 text-center">
+                    <span class="text-[10px] text-gray-400 uppercase tracking-wider block">P(Esperar)</span>
+                    <span id="kpi-pwait" class="text-base font-mono font-bold text-cyan-300">75.00%</span>
+                </div>
+                <div class="p-3 rounded-xl bg-gray-900/40 border border-white/5 text-center">
+                    <span class="text-[10px] text-gray-400 uppercase tracking-wider block">Cola Media (L<sub>q</sub>)</span>
+                    <span id="kpi-lq" class="text-base font-mono font-bold text-amber-300">2.25 ent</span>
+                </div>
+                <div class="p-3 rounded-xl bg-gray-900/40 border border-white/5 text-center">
+                    <span class="text-[10px] text-gray-400 uppercase tracking-wider block">Espera Cola (W<sub>q</sub>)</span>
+                    <span id="kpi-wq" class="text-base font-mono font-bold text-rose-300">4.50 min</span>
+                </div>
+                <div class="p-3 rounded-xl bg-gray-900/40 border border-white/5 text-center">
+                    <span class="text-[10px] text-gray-400 uppercase tracking-wider block">Total Sistema (W)</span>
+                    <span id="kpi-w" class="text-base font-mono font-bold text-indigo-300">6.00 min</span>
+                </div>
+            </div>
+
+            <!-- Grilla Visual: Canvas Animado + Histograma Pn -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Canvas Animado de la Cola -->
+                <div class="flex flex-col">
+                    <span class="text-xs font-semibold text-gray-400 mb-2 flex items-center gap-1.5">
+                        <span class="w-2 h-2 rounded-full bg-cyan-400"></span>
+                        <span>Flujo de Entidades en Tiempo Real (Simulación de Eventos Discretos)</span>
+                    </span>
+                    <div class="canvas-container h-[220px]">
+                        <canvas id="queueCanvas"></canvas>
+                    </div>
+                </div>
+
+                <!-- Histograma de Probabilidades Pn -->
+                <div class="flex flex-col">
+                    <span class="text-xs font-semibold text-gray-400 mb-2 flex items-center gap-1.5">
+                        <span class="w-2 h-2 rounded-full bg-purple-400"></span>
+                        <span>Distribución Teórica de Estados P<sub>n</sub> (% de probabilidad de n clientes)</span>
+                    </span>
+                    <div class="canvas-container h-[220px] p-2">
+                        <canvas id="pnChartCanvas"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECCIÓN 3: SELECTOR DE ALUMNO (8 Asignaciones + Demostración Docente) -->
+        <section class="mb-8">
+            <div class="text-center mb-3">
+                <span class="text-xs uppercase tracking-wider text-gray-400 font-semibold">Selecciona tu Asignación Individualizada:</span>
+            </div>
+            <div class="flex flex-wrap justify-center gap-2" id="exercise-tabs"></div>
+            <div class="text-center mt-3">
+                <span id="current-asig-title" class="text-xs font-mono text-cyan-400 bg-cyan-950/40 border border-cyan-800/40 px-3 py-1 rounded-full"></span>
+            </div>
+        </section>
+
+        <!-- SECCIÓN 4: VISTA DE ASIGNACIÓN DEL ALUMNO (Ejercicio A y B) -->
+        <div id="alumno-container" class="space-y-8">
+            
+            <!-- Tarjeta de Contexto del Caso Asignado -->
+            <div id="caso-context-desc"></div>
+
+            <!-- Botón Central de Validación y Descarga de Comprobante -->
+            <div class="text-center">
+                <button id="btn-validate-all" onclick="validateAll()" class="bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 hover:from-emerald-400 hover:to-teal-500 text-white font-bold py-3.5 px-8 rounded-full shadow-lg shadow-emerald-500/25 hover:shadow-emerald-500/40 transition-all transform hover:scale-105 text-sm md:text-base flex items-center gap-2 mx-auto">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 1118 0z"></path></svg>
+                    <span>Validar Ambos Ejercicios y Descargar Comprobante</span>
+                </button>
+                <p class="text-[11px] text-gray-400 mt-2">Valida localmente mediante SHA-256 criptográfico con el <strong class="text-emerald-400">DNI del alumno</strong>. Requiere exactamente <strong class="text-cyan-300">4 decimales</strong> usando punto decimal (ej: <code>0.7500</code>).</p>
+            </div>
+
+            <!-- Grilla con Ejercicio A y Ejercicio B -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                
+                <!-- EJERCICIO A (M/M/1) -->
+                <section class="glass-panel rounded-2xl p-6 md:p-8 relative border border-white/5 flex flex-col justify-between">
+                    <div>
+                        <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+                            <span class="text-xs font-mono uppercase tracking-widest text-primary font-bold">Primera Parte • Cola Simple</span>
+                            <span class="badge-tipo">Modelo M/M/1</span>
+                        </div>
+                        <h3 id="sector-title-A" class="text-xl md:text-2xl font-[Outfit] font-bold text-white mb-2"></h3>
+                        <p id="enunciado-desc-A" class="text-xs md:text-sm text-gray-300 leading-relaxed mb-4"></p>
+                        
+                        <!-- Badges de parámetros -->
+                        <div id="params-badge-A" class="flex flex-wrap items-center gap-2 mb-4 p-2.5 rounded-lg bg-black/30 border border-white/5"></div>
+                    </div>
+
+                    <!-- Formulario Workbench Ejercicio A -->
+                    <div>
+                        <span class="text-xs font-semibold text-gray-400 block mb-2">Workbench de Respuestas (Ejercicio A):</span>
+                        <div id="calc-form-A" class="space-y-2"></div>
+                    </div>
+                </section>
+
+                <!-- EJERCICIO B (M/M/c) -->
+                <section class="glass-panel rounded-2xl p-6 md:p-8 relative border border-white/5 flex flex-col justify-between">
+                    <div>
+                        <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+                            <span class="text-xs font-mono uppercase tracking-widest text-secondary font-bold">Segunda Parte • Multicanal</span>
+                            <span class="badge-tipo">Modelo M/M/c</span>
+                        </div>
+                        <h3 id="sector-title-B" class="text-xl md:text-2xl font-[Outfit] font-bold text-white mb-2"></h3>
+                        <p id="enunciado-desc-B" class="text-xs md:text-sm text-gray-300 leading-relaxed mb-4"></p>
+                        
+                        <!-- Badges de parámetros -->
+                        <div id="params-badge-B" class="flex flex-wrap items-center gap-2 mb-4 p-2.5 rounded-lg bg-black/30 border border-white/5"></div>
+                    </div>
+
+                    <!-- Formulario Workbench Ejercicio B -->
+                    <div>
+                        <span class="text-xs font-semibold text-gray-400 block mb-2">Workbench de Respuestas (Ejercicio B):</span>
+                        <div id="calc-form-B" class="space-y-2"></div>
+                    </div>
+                </section>
+
+            </div>
+        </div>
+
+        <!-- SECCIÓN 5: VISTA DEMOSTRATIVA DOCENTE (Resuelta en clase) -->
+        <div id="demo-container" class="hidden space-y-8">
+            <div class="p-6 rounded-2xl bg-gradient-to-r from-purple-950/40 via-indigo-950/30 to-purple-950/40 border border-purple-800/40">
+                <span class="badge-tipo mb-2 inline-block">Guía de Resolución en Pizarra</span>
+                <h3 class="text-2xl font-[Outfit] font-bold text-white mb-2">Demostración Paso a Paso para la Clase</h3>
+                <p class="text-sm text-gray-300 leading-relaxed">
+                    Estos dos ejercicios están diseñados para ser resueltos en vivo en la pizarra durante la clase teórica-práctica. Explican la transición desde una cola simple de servidor único (M/M/1) hacia un sistema multicanal en paralelo (M/M/2).
+                </p>
+            </div>
+
+            <!-- Demo 1: M/M/1 -->
+            <div class="glass-panel rounded-2xl p-6 md:p-8 border border-white/5">
+                <div class="flex justify-between items-center mb-3">
+                    <span class="badge-tipo">Demo 1 • Cola Simple M/M/1</span>
+                    <button onclick="loadIntoSandbox(30, 40, 1)" class="text-xs bg-primary/20 hover:bg-primary/40 text-purple-300 px-3 py-1 rounded-full border border-primary/30">
+                        ⚡ Cargar en Sandbox
+                    </button>
+                </div>
+                <h4 class="text-xl font-bold text-white mb-2">Caso: Cafetería Universitaria "Byte & Coffee" (Terminal Express)</h4>
+                <p class="text-xs text-gray-400 mb-4">Parámetros: &lambda; = 30 clientes/h, &mu; = 40 clientes/h (t<sub>s</sub> = 1.5 min).</p>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs text-gray-300 leading-relaxed">
+                    <div class="p-4 rounded-xl bg-gray-900/60 border border-white/5 space-y-2">
+                        <p class="font-bold text-cyan-300">1. Cálculos de Ocupación:</p>
+                        <p>• Utilización: &rho; = 30/40 = 0.75 (75%).</p>
+                        <p>• Ocio del cajero: P₀ = 1 - 0.75 = 0.25 (25%).</p>
+                        <p>• Probabilidad de esperar en fila: P(esperar) = &rho; = 0.75 (75%).</p>
+                    </div>
+                    <div class="p-4 rounded-xl bg-gray-900/60 border border-white/5 space-y-2">
+                        <p class="font-bold text-purple-300">2. Longitudes y Tiempos:</p>
+                        <p>• Cola media: L<sub>q</sub> = 0.75² / (1 - 0.75) = 2.25 clientes.</p>
+                        <p>• Clientes en local: L = 0.75 / 0.25 = 3.00 clientes.</p>
+                        <p>• Tiempo en cola: W<sub>q</sub> = (2.25 / 30) × 60 = 4.50 minutos.</p>
+                        <p>• Tiempo total: W = 4.50 + 1.50 = 6.00 minutos.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Demo 2: M/M/2 -->
+            <div class="glass-panel rounded-2xl p-6 md:p-8 border border-white/5">
+                <div class="flex justify-between items-center mb-3">
+                    <span class="badge-tipo">Demo 2 • Cola Múltiple M/M/2</span>
+                    <button onclick="loadIntoSandbox(20, 15, 2)" class="text-xs bg-secondary/20 hover:bg-secondary/40 text-cyan-300 px-3 py-1 rounded-full border border-secondary/30">
+                        ⚡ Cargar en Sandbox
+                    </button>
+                </div>
+                <h4 class="text-xl font-bold text-white mb-2">Caso: Centro de Control de Calidad "TechQuality"</h4>
+                <p class="text-xs text-gray-400 mb-4">Parámetros: &lambda; = 20 lotes/h, &mu; = 15 lotes/h por inspector, c = 2 inspectores en paralelo.</p>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs text-gray-300 leading-relaxed">
+                    <div class="p-4 rounded-xl bg-gray-900/60 border border-white/5 space-y-2">
+                        <p class="font-bold text-cyan-300">1. Intensidad y Probabilidad de Ocio:</p>
+                        <p>• Carga de tráfico: r = 20 / 15 = 1.3333 Erlangs.</p>
+                        <p>• Utilización por inspector: &rho; = 1.3333 / 2 = 0.6667 (66.7%).</p>
+                        <p>• Término 1: &sum; r<sup>n</sup>/n! = 1 + 1.3333 = 2.3333.</p>
+                        <p>• Término 2: r² / [2!(1 - &rho;)] = 1.3333² / (2 × 0.3333) = 2.6667.</p>
+                        <p>• P₀ = [2.3333 + 2.6667]<sup>-1</sup> = 1 / 5 = 0.2000 (20%).</p>
+                    </div>
+                    <div class="p-4 rounded-xl bg-gray-900/60 border border-white/5 space-y-2">
+                        <p class="font-bold text-purple-300">2. Indicadores Operativos (Erlang C):</p>
+                        <p>• Probabilidad de esperar: P(n &ge; 2) = 2.6667 × 0.20 = 0.5333 (53.3%).</p>
+                        <p>• Cola media: L<sub>q</sub> = 0.5333 × (0.6667 / 0.3333) = 1.0667 lotes.</p>
+                        <p>• Lotes en departamento: L = 1.0667 + 1.3333 = 2.4000 lotes.</p>
+                        <p>• Tiempo en cola: W<sub>q</sub> = (1.0667 / 20) × 60 = 3.20 minutos.</p>
+                        <p>• Tiempo en sistema: W = 3.20 + 4.00 = 7.20 minutos.</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- Footer Institucional -->
+    <footer class="border-t border-white/5 bg-black/60 py-6 text-center text-xs text-gray-500 relative z-10">
+        <p>Universidad Católica de Santiago del Estero • Facultad de Ingeniería • Carrera de Ingeniería en Informática</p>
+        <p class="mt-1">Cátedra de Modelos y Simulación 2026 • Ing. María Fernanda Vázquez | Ing. Fabio Damián Argañaraz Azua</p>
+    </footer>
+
+    <!-- Scripts de Datos y Lógica -->
+    <script src="js/ejercicios_data.js"></script>
+    <script src="js/visualizadores.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
