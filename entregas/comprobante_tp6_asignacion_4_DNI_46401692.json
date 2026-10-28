@@ -1,0 +1,31 @@
+{
+  "tp": "TP6",
+  "titulo": "Teoría de Colas y Modelos de Líneas de Espera",
+  "catedra": "Modelos y Simulación - UCSE 2026",
+  "dni": "46401692",
+  "asignacion": "asignacion_4",
+  "caso": "CallCenter BGH (Soporte Técnico)",
+  "timestamp": "2026-10-28T17:29:27.256Z",
+  "puntaje": "100/100 Pts",
+  "respuestas": {
+    "ejA": {
+      "rho": "0.7143",
+      "p0": "0.2857",
+      "p_wait": "0.7143",
+      "Lq": "1.7857",
+      "L": "2.5000",
+      "Wq_min": "4.2857",
+      "W_min": "6.0000"
+    },
+    "ejB": {
+      "rho": "0.7500",
+      "p0": "0.0748",
+      "p_wait": "0.5678",
+      "Lq": "1.7033",
+      "L": "3.9533",
+      "Wq_min": "5.6776",
+      "W_min": "13.1776"
+    }
+  },
+  "firma_sha256": "60d206e26c872a06fc1724b9d73c6046cb8095fbd81f4ad74b6cfed5e69dedd3"
+}
