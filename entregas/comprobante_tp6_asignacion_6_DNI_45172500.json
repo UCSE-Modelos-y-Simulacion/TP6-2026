@@ -1,0 +1,31 @@
+{
+  "tp": "TP6",
+  "titulo": "Teoría de Colas y Modelos de Líneas de Espera",
+  "catedra": "Modelos y Simulación - UCSE 2026",
+  "dni": "45172500",
+  "asignacion": "asignacion_6",
+  "caso": "CyberShop Express (Cross-docking)",
+  "timestamp": "2026-10-28T11:51:06.935Z",
+  "puntaje": "100/100 Pts",
+  "respuestas": {
+    "ejA": {
+      "rho": "0.7143",
+      "p0": "0.2857",
+      "p_wait": "0.7143",
+      "Lq": "1.7857",
+      "L": "2.5000",
+      "Wq_min": "2.1429",
+      "W_min": "3.0000"
+    },
+    "ejB": {
+      "rho": "0.7778",
+      "p0": "0.0642",
+      "p_wait": "0.6114",
+      "Lq": "2.1399",
+      "L": "4.4733",
+      "Wq_min": "3.0570",
+      "W_min": "6.3904"
+    }
+  },
+  "firma_sha256": "4676dc9a599ef31d3ec9a9346e7269e1f19f2e7b452336b705b9efc0d3da2a33"
+}
