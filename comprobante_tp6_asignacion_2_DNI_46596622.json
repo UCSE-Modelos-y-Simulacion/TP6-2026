@@ -1,0 +1,31 @@
+{
+  "tp": "TP6",
+  "titulo": "Teoría de Colas y Modelos de Líneas de Espera",
+  "catedra": "Modelos y Simulación - UCSE 2026",
+  "dni": "46596622",
+  "asignacion": "asignacion_2",
+  "caso": "Peaje Ruta 9 (Concesiones Viales)",
+  "timestamp": "2026-10-21T02:34:54.202Z",
+  "puntaje": "100/100 Pts",
+  "respuestas": {
+    "ejA": {
+      "rho": "0.7500",
+      "p0": "0.2500",
+      "p_wait": "0.7500",
+      "Lq": "2.2500",
+      "L": "3.0000",
+      "Wq_min": "3.0000",
+      "W_min": "4.0000"
+    },
+    "ejB": {
+      "rho": "0.8000",
+      "p0": "0.0562",
+      "p_wait": "0.6472",
+      "Lq": "2.5888",
+      "L": "4.9888",
+      "Wq_min": "1.2944",
+      "W_min": "2.4944"
+    }
+  },
+  "firma_sha256": "4872c6e24490d91c14076bbea56802c17f40559094abad41cb58b5f567376086"
+}
