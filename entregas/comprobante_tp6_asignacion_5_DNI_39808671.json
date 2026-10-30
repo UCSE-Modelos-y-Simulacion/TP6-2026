@@ -1,0 +1,31 @@
+{
+  "tp": "TP6",
+  "titulo": "Teoría de Colas y Modelos de Líneas de Espera",
+  "catedra": "Modelos y Simulación - UCSE 2026",
+  "dni": "39808671",
+  "asignacion": "asignacion_5",
+  "caso": "Banco Santander (Sucursal Céntrica)",
+  "timestamp": "2026-10-30T22:43:13.251Z",
+  "puntaje": "100/100 Pts",
+  "respuestas": {
+    "ejA": {
+      "rho": "0.7500",
+      "p0": "0.2500",
+      "p_wait": "0.7500",
+      "Lq": "2.2500",
+      "L": "3.0000",
+      "Wq_min": "9.0000",
+      "W_min": "12.0000"
+    },
+    "ejB": {
+      "rho": "0.7143",
+      "p0": "0.1667",
+      "p_wait": "0.5952",
+      "Lq": "1.4881",
+      "L": "2.9167",
+      "Wq_min": "4.4643",
+      "W_min": "8.7500"
+    }
+  },
+  "firma_sha256": "d400e9a8fd13f19ef32f65a3feccc23aee9870f632c31bb46b45724784766f0f"
+}
