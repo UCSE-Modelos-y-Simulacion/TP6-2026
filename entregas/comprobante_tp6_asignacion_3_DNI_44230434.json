@@ -1,0 +1,31 @@
+{
+  "tp": "TP6",
+  "titulo": "Teoría de Colas y Modelos de Líneas de Espera",
+  "catedra": "Modelos y Simulación - UCSE 2026",
+  "dni": "44230434",
+  "asignacion": "asignacion_3",
+  "caso": "StarCoffee Nieva (Cafetería)",
+  "timestamp": "2026-10-30T18:52:55.750Z",
+  "puntaje": "100/100 Pts",
+  "respuestas": {
+    "ejA": {
+      "rho": "0.8000",
+      "p0": "0.2000",
+      "p_wait": "0.8000",
+      "Lq": "3.2000",
+      "L": "4.0000",
+      "Wq_min": "4.8000",
+      "W_min": "6.0000"
+    },
+    "ejB": {
+      "rho": "0.7500",
+      "p0": "0.1429",
+      "p_wait": "0.6429",
+      "Lq": "1.9286",
+      "L": "3.4286",
+      "Wq_min": "3.8571",
+      "W_min": "6.8571"
+    }
+  },
+  "firma_sha256": "3358bd9dd3ea5b29ad77ee7f4aa7ff1c3af76841dfe7b65af38e9c36099d4c16"
+}
